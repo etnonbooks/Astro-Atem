@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Atem</title>
+</head>
+<body>
+<center>
+
+    <!-- ========================================
+         TÍTULO
+    ========================================= -->
+    <div id="cabecalho">
+        <h1>Astro Atem</h1>
+        <p>Mapa Natal | Método Plácidus</p>
+    </div>
+
+
+    <!-- ========================================
+         FORMULÁRIO
+    ========================================= -->
+    <div id="formulario">
+
+        <!-- Identificação -->
+        <div id="secao-identificacao">
+            <p>
+                <label for="nome">Nome</label>&nbsp;
+                <input type="text" id="nome" placeholder="Nome completo" size="30">
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label for="genero">Gênero</label>&nbsp;
+                <select id="genero">
+                    <option value="m">Masculino</option>
+                    <option value="f">Feminino</option>
+                    <option value="n">Indefinido</option>
+                </select>
+            </p>
+        </div>
+
+        <!-- Data e Hora de Nascimento -->
+        <div id="secao-data">
+            <p>
+                <label for="dia">Dia</label>&nbsp;
+                <input type="text" id="dia" maxlength="2" placeholder="DD" style="width:2em">
+                &nbsp;&nbsp;
+                <label for="mes">Mês</label>&nbsp;
+                <select id="mes">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+                &nbsp;&nbsp;
+                <label for="ano">Ano</label>&nbsp;
+                <input type="text" id="ano" maxlength="4" placeholder="AAAA" style="width:4em">
+                &nbsp;&nbsp;
+                <label for="hora">Hora</label>&nbsp;
+                <input type="text" id="hora" maxlength="2" placeholder="HH" style="width:2em">
+                &nbsp;&nbsp;
+                <label for="minuto">Minuto</label>&nbsp;
+                <input type="text" id="minuto" maxlength="2" placeholder="MM" style="width:2em">
+            </p>
+        </div>
+
+        <!-- Localização -->
+        <div id="secao-localizacao">
+            <p>
+                <label for="campo-pais">País</label>&nbsp;
+                <input type="text" id="campo-pais" placeholder="Ex: Brasil" size="20" autocomplete="off" oninput="buscarPais()">
+                <br>
+                <select id="sugestoes-pais" size="4" style="display:none; width:220px;" onchange="selecionarPaisDaLista()"></select>
+            </p>
+            <p>
+                <label for="campo-cidade">Cidade</label>&nbsp;
+                <input type="text" id="campo-cidade" placeholder="Ex: São Paulo" size="20" autocomplete="off" oninput="buscarCidade()" disabled>
+                <br>
+                <select id="sugestoes-cidade" size="4" style="display:none; width:220px;" onchange="selecionarCidadeDaLista()"></select>
+            </p>
+            <!-- Latitude e longitude preenchidas automaticamente (invisíveis) -->
+            <input type="hidden" id="latitude">
+            <input type="hidden" id="longitude">
+        </div>
+
+
+        <!-- Opções -->
+        <div id="secao-opcoes">
+            <table id="campo-opcoes" cellspacing="4" align="center">
+                <tr>
+                    <td><label for="modo_aspectos">Linhas de aspectos</label></td>
+                    <td>
+                        <select id="modo_aspectos">
+                            <option value="1">Linhas simples</option>
+                            <option value="2">Linhas complexas</option>
+                            <option value="3">Sem linhas</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="mostrar_tabela">Elementos e modalidades</label></td>
+                    <td>
+                        <select id="mostrar_tabela">
+                            <option value="y">Exibir</option>
+                            <option value="n">Não exibir</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="mostrar_aspectos">Tabela de aspectos</label></td>
+                    <td>
+                        <select id="mostrar_aspectos">
+                            <option value="y">Exibir</option>
+                            <option value="n">Não exibir</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="language">Idioma</label></td>
+                    <td>
+                        <select id="language">
+                            <option value="pt">Português</option>
+                            <option value="eng">Inglês</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <br>
+
+        <!-- Botão -->
+        <div id="secao-botao">
+            <button id="btn-gerar" onclick="gerarMapa()">Gerar Mapa</button>
+        </div>
+
+    </div>
+
+
+    <!-- ========================================
+         RESULTADO
+    ========================================= -->
+    <div id="resultado">
+
+        <!-- Mensagem de status (carregando / erro) -->
+        <p id="status" style="display: none;"></p>
+
+        <!-- Imagem gerada -->
+        <img id="imagem-mapa" style="display: none; max-width: 50%; height: auto;" alt="Mapa Astral gerado">
+
+        <br>
+
+        <!-- Botão de download -->
+        <div id="secao-download" style="display: none;">
+            <a id="link-download" download="mapa_astral.png">
+                <button>Salvar Imagem</button>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ========================================
+         JAVASCRIPT
+    ========================================= -->
+    <script>
+
+        // ── AUTOCOMPLETE DE PAÍS E CIDADE ──────────────────────
+        let paisSelecionado = null;
+        let timerPais       = null;
+        let timerCidade     = null;
+        let cidadesCache    = [];
+
+        function buscarPais() {
+            clearTimeout(timerPais);
+            const termo = document.getElementById("campo-pais").value.trim();
+            const listaPais = document.getElementById("sugestoes-pais");
+            listaPais.innerHTML = "";
+            listaPais.style.display = "none";
+            paisSelecionado = null;
+            document.getElementById("campo-cidade").disabled = true;
+            document.getElementById("campo-cidade").value = "";
+            document.getElementById("sugestoes-cidade").innerHTML = "";
+            document.getElementById("sugestoes-cidade").style.display = "none";
+            document.getElementById("latitude").value = "";
+            document.getElementById("longitude").value = "";
+
+            if (termo.length < 2) return;
+
+            timerPais = setTimeout(async () => {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(termo)}&format=json&addressdetails=1&limit=10&accept-language=pt`;
+                    const res  = await fetch(url);
+                    const data = await res.json();
+
+                    const unicos = {};
+                    data.forEach(d => {
+                        const nome = d.address?.country;
+                        const code = d.address?.country_code;
+                        if (nome && code && !unicos[code]) unicos[code] = { nome, code };
+                    });
+
+                    const lista = Object.values(unicos).slice(0, 6);
+                    listaPais.innerHTML = "";
+                    if (lista.length === 0) {
+                        const opt = document.createElement("option");
+                        opt.textContent = "Nenhum resultado";
+                        opt.disabled = true;
+                        listaPais.appendChild(opt);
+                    } else {
+                        lista.forEach(item => {
+                            const opt = document.createElement("option");
+                            opt.value = JSON.stringify(item);
+                            opt.textContent = item.nome;
+                            listaPais.appendChild(opt);
+                        });
+                    }
+                    listaPais.style.display = "block";
+                } catch (e) {
+                    console.error("Erro ao buscar países:", e);
+                }
+            }, 400);
+        }
+
+        function selecionarPaisDaLista() {
+            const listaPais = document.getElementById("sugestoes-pais");
+            const val = listaPais.value;
+            if (!val) return;
+            const item = JSON.parse(val);
+            paisSelecionado = item;
+            document.getElementById("campo-pais").value = item.nome;
+            listaPais.style.display = "none";
+            document.getElementById("campo-cidade").disabled = false;
+            document.getElementById("campo-cidade").focus();
+        }
+
+        function buscarCidade() {
+            clearTimeout(timerCidade);
+            const termo = document.getElementById("campo-cidade").value.trim();
+            const listaCidade = document.getElementById("sugestoes-cidade");
+            listaCidade.innerHTML = "";
+            listaCidade.style.display = "none";
+            document.getElementById("latitude").value = "";
+            document.getElementById("longitude").value = "";
+
+            if (termo.length < 2 || !paisSelecionado) return;
+
+            timerCidade = setTimeout(async () => {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(termo)}&countrycodes=${paisSelecionado.code}&format=json&addressdetails=1&limit=8&accept-language=pt`;
+                    const res  = await fetch(url);
+                    const data = await res.json();
+
+                    const unicos = {};
+                    data.forEach(d => {
+                        const cidade = d.address?.city || d.address?.town || d.address?.village || d.address?.municipality || d.display_name.split(",")[0].trim();
+                        const estado = d.address?.state || d.address?.province || "";
+                        const key    = cidade + "|" + estado;
+                        if (!unicos[key]) unicos[key] = { cidade, estado, lat: d.lat, lon: d.lon };
+                    });
+
+                    cidadesCache = Object.values(unicos).slice(0, 6);
+                    listaCidade.innerHTML = "";
+
+                    if (cidadesCache.length === 0) {
+                        const opt = document.createElement("option");
+                        opt.textContent = "Nenhum resultado";
+                        opt.disabled = true;
+                        listaCidade.appendChild(opt);
+                    } else {
+                        cidadesCache.forEach((item, idx) => {
+                            const label = item.estado ? `${item.cidade}, ${item.estado}` : item.cidade;
+                            const opt = document.createElement("option");
+                            opt.value = idx;
+                            opt.textContent = label;
+                            listaCidade.appendChild(opt);
+                        });
+                    }
+                    listaCidade.style.display = "block";
+                } catch (e) {
+                    console.error("Erro ao buscar cidades:", e);
+                }
+            }, 400);
+        }
+
+        function selecionarCidadeDaLista() {
+            const listaCidade = document.getElementById("sugestoes-cidade");
+            const idx = listaCidade.value;
+            if (idx === "" || !cidadesCache[idx]) return;
+            const item = cidadesCache[idx];
+            const label = item.estado ? `${item.cidade}, ${item.estado}` : item.cidade;
+            document.getElementById("campo-cidade").value = label;
+            document.getElementById("latitude").value  = item.lat;
+            document.getElementById("longitude").value = item.lon;
+            listaCidade.style.display = "none";
+        }
+        // ────────────────────────────────────────────────────────
+
+        async function gerarMapa() {
+
+            // Coleta os valores do formulário
+            const dados = {
+                nome:             document.getElementById("nome").value,
+                genero:           document.getElementById("genero").value,
+                ano:              document.getElementById("ano").value,
+                mes:              document.getElementById("mes").value,
+                dia:              document.getElementById("dia").value,
+                hora:             document.getElementById("hora").value,
+                minuto:           document.getElementById("minuto").value,
+                latitude:         document.getElementById("latitude").value,
+                longitude:        document.getElementById("longitude").value,
+                modo_aspectos:    document.getElementById("modo_aspectos").value,
+                mostrar_tabela:   document.getElementById("mostrar_tabela").value,
+                mostrar_aspectos: document.getElementById("mostrar_aspectos").value,
+                language:         document.getElementById("language").value
+            };
+
+            // Exibe mensagem de carregamento
+            const status   = document.getElementById("status");
+            const imagem   = document.getElementById("imagem-mapa");
+            const download = document.getElementById("secao-download");
+            const btn      = document.getElementById("btn-gerar");
+
+            status.textContent = "Gerando mapa, aguarde...";
+            status.style.display = "block";
+            imagem.style.display = "none";
+            download.style.display = "none";
+            btn.disabled = true;
+
+            try {
+                // Envia os dados pro servidor
+                const resposta = await fetch("https://mandala-site.fly.dev/gerar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dados)
+                });
+
+                if (!resposta.ok) {
+                    const erro = await resposta.json();
+                    throw new Error(erro.erro || "Erro desconhecido no servidor.");
+                }
+
+                // Converte a resposta em imagem
+                const blob = await resposta.blob();
+                const url  = URL.createObjectURL(blob);
+
+                // Exibe a imagem
+                imagem.src = url;
+                imagem.style.display = "block";
+
+                // Configura o botão de download
+                document.getElementById("link-download").href = url;
+                download.style.display = "block";
+
+                status.style.display = "none";
+
+            } catch (erro) {
+                status.textContent = "Erro: " + erro.message;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+    </script>
+
+</center>
+</body>
+</html>
