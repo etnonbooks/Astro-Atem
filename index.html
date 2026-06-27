@@ -9,7 +9,7 @@
 <center>
 
     <!-- ========================================
-         TÍTULO
+         Cabeça provisória
     ========================================= -->
     <div id="cabecalho">
         <h1>Astro Atem</h1>
@@ -18,7 +18,7 @@
 
 
     <!-- ========================================
-         FORMULÁRIO
+         Formulário
     ========================================= -->
     <div id="formulario">
 
@@ -84,13 +84,13 @@
                 <br>
                 <select id="sugestoes-cidade" size="4" style="display:none; width:220px;" onchange="selecionarCidadeDaLista()"></select>
             </p>
-            <!-- Latitude e longitude preenchidas automaticamente (invisíveis) -->
+            <!-- Latitude e longitude com preenchimento automático -->
             <input type="hidden" id="latitude">
             <input type="hidden" id="longitude">
         </div>
 
 
-        <!-- Opções -->
+        <!-- Opções que podem ser exibidas no mapa natal -->
         <div id="secao-opcoes">
             <table id="campo-opcoes" cellspacing="4" align="center">
                 <tr>
@@ -144,7 +144,7 @@
 
 
     <!-- ========================================
-         RESULTADO
+         Resultado da Api
     ========================================= -->
     <div id="resultado">
 
@@ -166,11 +166,11 @@
     </div>
 
     <!-- ========================================
-         JAVASCRIPT
+         Javascript
     ========================================= -->
     <script>
 
-        // ── AUTOCOMPLETE DE PAÍS E CIDADE ──────────────────────
+        // ── Auto completar país e cidade ─────
         let paisSelecionado = null;
         let timerPais       = null;
         let timerCidade     = null;
@@ -303,7 +303,7 @@
 
         async function gerarMapa() {
 
-            // Coleta os valores do formulário
+            // Pega os valores do formulário
             const dados = {
                 nome:             document.getElementById("nome").value,
                 genero:           document.getElementById("genero").value,
@@ -320,7 +320,7 @@
                 language:         document.getElementById("language").value
             };
 
-            // Exibe mensagem de carregamento
+            // Exibe mensagem enquanto carrega
             const status   = document.getElementById("status");
             const imagem   = document.getElementById("imagem-mapa");
             const download = document.getElementById("secao-download");
